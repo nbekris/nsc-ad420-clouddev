@@ -38,21 +38,42 @@
   ],
   "paths": {
     "/user": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get user object",
+        "description": "returns user object",
+        "operationId": "getUserObject",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful get",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "user"
         ],
         "summary": "Create user",
-        "description": "This can only be done by the logged in user.",
+        "description": "creates new user",
         "operationId": "createUser",
         "produces": [
-          "application/xml",
           "application/json"
         ],
         "parameters": [
           {
             "in": "body",
-            "name": "body",
+            "name": "newUser",
             "description": "Created user object",
             "required": true,
             "schema": {
@@ -61,8 +82,14 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": "successful operation"
+          "200": {
+            "description": "Created User Successfully",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          "405": {
+            "description": "invalid input"
           }
         }
       }
@@ -76,30 +103,26 @@
         "description": "",
         "operationId": "getUserByName",
         "produces": [
-          "application/xml",
           "application/json"
         ],
         "parameters": [
           {
             "name": "username",
             "in": "path",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "description": "name of user",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "username found",
             "schema": {
               "$ref": "#/definitions/User"
             }
           },
-          "400": {
-            "description": "Invalid username supplied"
-          },
           "404": {
-            "description": "User not found"
+            "description": "username not found"
           }
         }
       },
@@ -107,11 +130,10 @@
         "tags": [
           "user"
         ],
-        "summary": "Updated user",
-        "description": "This can only be done by the logged in user.",
+        "summary": "Update user",
+        "description": "",
         "operationId": "updateUser",
         "produces": [
-          "application/xml",
           "application/json"
         ],
         "parameters": [
@@ -123,8 +145,8 @@
             "type": "string"
           },
           {
+            "name": "user",
             "in": "body",
-            "name": "body",
             "description": "Updated user object",
             "required": true,
             "schema": {
@@ -133,11 +155,14 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "Invalid user supplied"
+          "200": {
+            "description": "user updated successfully"
           },
-          "404": {
-            "description": "User not found"
+          "400": {
+            "description": "user not found"
+          },
+          "405": {
+            "description": "invalid user"
           }
         }
       },
@@ -146,10 +171,9 @@
           "user"
         ],
         "summary": "Delete user",
-        "description": "This can only be done by the logged in user.",
+        "description": "",
         "operationId": "deleteUser",
         "produces": [
-          "application/xml",
           "application/json"
         ],
         "parameters": [
@@ -162,8 +186,8 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "Invalid username supplied"
+          "200": {
+            "description": "user deleted"
           },
           "404": {
             "description": "User not found"
@@ -171,10 +195,10 @@
         }
       }
     },
-    "/user/{id}/tasks": {
+    "/user/{username}/tasks": {
       "get": {
         "tags": [
-          "user"
+          "task"
         ],
         "summary": "Get user by user name",
         "description": "",
@@ -185,46 +209,57 @@
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "username",
             "in": "path",
-            "description": "The user id that needs to be fetched.",
+            "description": "",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "found task",
             "schema": {
               "$ref": "#/definitions/Task"
             }
           },
-          "400": {
-            "description": "Invalid username supplied"
-          },
           "404": {
-            "description": "User not found"
+            "description": "task not found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "task"
+        ],
+        "summary": "create tasks",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "default": {
+            "description": "successful post"
           }
         }
       }
     },
-    "/users/{userId}/tasks/{taskId}": {
+    "/users/{username}/tasks/{taskId}": {
       "get": {
         "tags": [
-          "user"
+          "task"
         ],
         "summary": "Get task by id from user by name",
         "description": "",
         "operationId": "getTaskByIDUserByName",
         "produces": [
-          "application/xml",
           "application/json"
         ],
         "parameters": [
           {
-            "name": "userId",
+            "name": "username",
             "in": "path",
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "description": "",
             "required": true,
             "type": "integer"
           },
@@ -239,14 +274,82 @@
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/Task"
             }
           },
-          "400": {
-            "description": "Invalid username or task Id supplied"
+          "404": {
+            "description": "invalid user"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "task"
+        ],
+        "summary": "update task",
+        "description": "update user task",
+        "operationId": "updateTask",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "username",
+            "description": "User Name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "task",
+            "description": "updated task object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Task"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "task updated"
           },
           "404": {
-            "description": "User not found"
+            "description": "invalid input"
+          },
+          "405": {
+            "description": "task not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "task"
+        ],
+        "summary": "delete task",
+        "description": "This can only be done by logged in user",
+        "operationId": "deleteTask",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Task Deleted"
+          },
+          "404": {
+            "description": "Task not found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "task"
+        ],
+        "summary": "Create task by id ffrom username",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "default": {
+            "description": "successful post"
           }
         }
       }
